@@ -47,7 +47,7 @@ server/
     └── orbisoptimizer.jar          # commands, dashboard, public API (Layer 3)
 ```
 
-Install both JARs. No configuration required to get started.
+Install both JARs. No configuration required to get started. The optimizer starts active with default settings — AIMD begins at zero pressure and only ramps up if the server actually needs it. On a healthy server, it does nothing visible.
 
 ## Adapter contract status
 
@@ -64,7 +64,7 @@ Install both JARs. No configuration required to get started.
 
 ## Known challenges
 
-ECS architecture (Flecs): Hytale entities aren't independently schedulable. Work happens at the ECS system level. OrbisOptimizer's SU definition needs to map to Flecs archetypes or system queries, not individual entities. This is the biggest open design question.
+ECS architecture (Flecs): Hytale entities aren't independently schedulable. Work happens at the ECS system level. For now, SU = ECS system — the scheduler decides whether a whole system runs each tick. Per-entity or per-archetype deferral may come later depending on results. See model.md section 6.
 
 Criticality in Hytale's interaction system: The interaction system (combos, charging, wielding, forks) is stateful. Correctly identifying "this entity is in an active interaction chain with a player" requires understanding that state at scheduling time. Starting conservative (any direct player involvement = critical).
 

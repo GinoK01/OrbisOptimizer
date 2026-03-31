@@ -157,18 +157,17 @@ Without this: State velocity is approximated through position delta polling or o
 
 ## ECS-specific notes
 
-For engines using Entity Component Systems (like Hytale with Flecs), the adapter contract maps differently:
+For engines using Entity Component Systems (like Hytale with Flecs), the adapter contract maps differently. The full treatment is in [model.md section 6](model.md#6-sus-in-ecs-engines). Short version for the adapter:
 
-| Standard concept | ECS equivalent |
+| Standard concept | ECS equivalent (initial implementation) |
 |---|---|
-| Simulation Unit | ECS system or archetype (not individual entity) |
-| Enumerate SUs | Query active archetypes / running systems |
-| Defer unit | Skip system execution for matching entities |
-| Cost per unit | Average cost per archetype from profiling |
+| Simulation Unit | ECS system |
+| Enumerate SUs | List active systems with matched entity counts |
+| Defer unit | Skip system execution this tick |
+| Cost per unit | Rolling average execution time per system |
+| SU position | Centroid of entities matched by the system's query |
 
-This is an important departure from the OOP-oriented approach in the base model spec. An individual entity in Flecs isn't an independently schedulable unit — work happens at the system level, processed in batch over archetypes. Implementing OrbisOptimizer for an ECS game means thinking about deferral at the system+query level, not per entity.
-
-This has significant implications for how the relevance function works: instead of scoring individual entities, it may be necessary to partition entities by archetype and decide which partitions to defer.
+SU = whole system for now, not per-entity or per-archetype. It's the coarsest option and the easiest to hook. Whether that granularity is fine enough for meaningful optimization is what the first benchmarks will show.
 
 ---
 
@@ -184,7 +183,9 @@ With these four, OrbisOptimizer can:
 - Adjust pressure based on load.
 - Apply the staleness limit.
 
-It won't be optimal, but it's a meaningful starting point.
+"Meaningful" has a concrete target: the MVP adapter should show measurable improvement in P95 MSPT under scenario B (clustering) compared to no optimization. If R1-R4 alone can't do that, the optional capabilities are worth looking at.
+
+That's a bar, not a guarantee. Load profiles vary. But it's something to aim at when evaluating a partial implementation.
 
 ---
 

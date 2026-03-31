@@ -52,11 +52,13 @@ Every existing optimizer follows the same pattern: monitor a metric → cross a 
 
 OrbisOptimizer's differentiator: continuous relevance scoring + adaptive AIMD scheduling + real-time observability dashboard. The observability angle is the biggest gap in the market — no existing optimizer for any voxel game shows what it's doing, where, why, and how much it's saving. That's the hook.
 
+That said — "continuous relevance scoring" is a theory until benchmarks show it actually holds target TPS longer than Server Optimizer's threshold approach under real load. The dashboard is genuinely novel, but it's a second differentiator: it makes the tool more trustworthy, not better. The bet is that both hold up. The benchmark is what settles it.
+
 ## Decisions made
 
 D1: Full implementation first, not API first. The community adopts things that work. A good implementation will produce an organic API when others want to build on top of it.
 
-D2: Zero required configuration. Install the JAR, it works. AIMD self-calibrates from zero pressure. Configuration exists for those who want it; it's not required for those who don't.
+D2: Zero required configuration. Install the JAR, it works. The optimizer starts active with sensible defaults — no setup, no calibration step. AIMD starts at zero pressure and ramps up only if the server actually needs it, so on a healthy server it's basically invisible. Configuration exists for those who want it; it's not required for those who don't.
 
 D3: Observability as the central differentiator. Real-time visual dashboard showing what's being optimized, where, and how much. Nobody does this.
 
@@ -66,18 +68,13 @@ D5: Hytale as first target. Java (compatible with my expertise), new ecosystem i
 
 ## Open questions I'm left with
 
-- How do Simulation Units map to Flecs archetypes and systems? The spec needs revision here.
-- What's the overhead of relevance scoring per tick with 10,000+ entities? I need profiling.
-- Is a scalar relevance score enough or do I need multidimensional scoring?
-- Can OrbisOptimizer coexist cleanly with Catalyst (which also does bytecode injection)?
-- How should criticality be defined for Hytale's interaction system (combos, charging, forks)?
+These are tracked in [spec/open-questions.md](../spec/open-questions.md). The Hytale-specific ones from today: OQ-7 (SU/Flecs mapping), OQ-6 (scoring overhead at scale), OQ-1 (scalar vs multidimensional), OQ-11 (Catalyst coexistence), OQ-12 (criticality for Hytale interactions).
 
 ## What's next
 
-- Revise the SU definition in the model spec to account for ECS/Flecs.
 - Sketch the Java project structure for the three-layer architecture (engine, adapter, observability).
 - Investigate what Hyxin injection points look like for the ECS tick loop.
-- Start the reference implementation skeleton.
+- Start the reference implementation skeleton — passive profiler first.
 
 ---
 

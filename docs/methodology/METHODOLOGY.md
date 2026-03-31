@@ -54,6 +54,26 @@ Standardized situations that anyone can set up and run:
 
 Parameters (N, M, specific entity types) should be chosen to reflect realistic loads for the target game. What's realistic for a 50-player Hytale server is very different from a 2000-player MMO.
 
+### Scenario F: Area event
+
+- A sudden large-scale effect (explosion, spawner burst, area spell) hits a region near a player, many entities affected at once.
+- Does the optimizer treat affected entities as critical during the event? Does pressure recover cleanly after, or does it stay elevated?
+
+### Scenario G: AFK player
+
+- A player connected and stationary, not interacting with anything, for several minutes.
+- Ambient AI, environmental physics, and anything with ongoing state still needs to tick near the player. Does the optimizer over-defer just because the player stopped moving?
+
+### Scenario H: Teleportation
+
+- A player teleports a large distance. The relevant region shifts instantly.
+- How long before the new region is fully active? How long before the old one winds down?
+
+### Scenario I: Autonomous mechanism
+
+- A redstone circuit, spawner, or automated farm running in a chunk with no nearby players.
+- Does the optimizer kill it? It shouldn't — these have observable effects with no one watching. If they break, the staleness limit is too long or criticality is missing a case.
+
 ## Reproducibility
 
 For results to be useful to others:

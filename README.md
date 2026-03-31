@@ -109,7 +109,7 @@ orbisoptimizer/
 
 The model spec and project structure are in place. The reference implementation hasn't started yet, and there are more open questions than answers. Good time to get involved if you want to influence the direction.
 
-Follow progress in the [devlog](devlog/) or read the [project research summary](docs/research/orbit-summary-completo.md).
+Follow progress in the [devlog](devlog/).
 
 ## How to get involved
 

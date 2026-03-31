@@ -56,12 +56,10 @@ Parameters:
 
 Known tradeoffs:
 - Slow recovery means the optimizer stays more aggressive than necessary after a spike. This wastes simulation capacity.
-- The hold zone (0.60–0.85) prevents unnecessary pressure changes at borderline loads, but means small load changes don't take effect immediately.
+- The hold zone (0.60–0.85) is intentional — it prevents the controller from hunting when load bounces near a threshold. The cost is that borderline loads don't get adjusted immediately. A server sitting at 72% load does nothing, which is fine; you don't want pressure toggling every other tick. If you find the zone too wide for your load profile, narrow it and watch for oscillation.
 - `multiplicative_factor = 0.5` means pressure halves each comfortable tick — in 10 quiet ticks, it falls to ~0.1% of its peak. That may be faster than desired.
 
-Open questions:
-- Is 0.85/0.60 the right band for game servers? TCP uses different thresholds depending on the network profile.
-- Should the additive step be proportional to how far the threshold is exceeded?
+Open questions: OQ-9, OQ-10 in [open-questions.md](open-questions.md).
 
 ---
 
@@ -154,6 +152,21 @@ Tradeoff:
 | Stepped thresholds | Instant at boundary | Instant at boundary | High | Low (threshold values) |
 | PID | Adjustable | Adjustable | Low | High (3 params + stability) |
 | EMA + any | Smoothed | Smoothed | Same as base | +1 param (alpha) |
+
+---
+
+## Strategy 0: Passthrough (observe-only)
+
+Not a real controller — pressure is always 0.0. The scheduler scores every SU but defers nothing.
+
+```
+pressure = 0.0   // always
+```
+
+Why it's useful:
+- Measures the overhead of the scoring pass itself, without deferral effects mixed in.
+- Useful as the baseline in benchmarks: "how much does just running the relevance function cost per tick?"
+- Also useful as a safe mode during initial deployment. Let it run for a day, see what the scores look like, then enable actual deferral once you trust the signals.
 
 ---
 

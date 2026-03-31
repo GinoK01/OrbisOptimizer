@@ -58,13 +58,15 @@ Setup instructions specific to each implementation will be in that implementatio
 
 ## Opening issues
 
-Some suggested labels, but don't worry too much about picking the right one for now:
+Labels are set up on the repository. Use whichever fits, and don't worry too much about it — a mismatched label is fine:
 
 - `model` — questions or challenges to the spec
 - `implementation` — bugs, improvements, or new implementations
 - `benchmark` — data, methodology questions, or results
 - `question` — anything you're curious about
 - `idea` — something that might be worth exploring
+
+There are a few open issues already tracking the known open questions from the spec. If you want to contribute but aren't sure where to start, those are a reasonable entry point.
 
 ## Code of conduct
 

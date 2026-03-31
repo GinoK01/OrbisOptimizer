@@ -16,10 +16,11 @@ From the [model specification](model.md):
 R(su, ctx) = w_d × proximity(su, nearest_player)
            + w_i × interaction_recency(su)
            + w_v × state_velocity(su)
-           + w_c × criticality(su)
 ```
 
-Each term is a signal in [0.0, 1.0]. The weights (w_d, w_i, w_v, w_c) sum to 1.0 and control how much each signal contributes.
+Each term is a signal in [0.0, 1.0]. The weights (w_d, w_i, w_v) sum to 1.0 and control how much each signal contributes.
+
+Criticality is handled separately — critical SUs bypass the scheduler entirely before scoring happens. It's not a term in this formula. See [model.md](model.md) section 3.2.
 
 ---
 
@@ -102,28 +103,24 @@ Caveats:
 
 ### Pattern 4: Criticality
 
-What it measures: Whether this SU must simulate this tick regardless of other factors.
+Criticality isn't a scoring signal — it's a gate before scoring. If an SU is critical, it runs unconditionally this tick and never reaches the relevance function. This keeps the scheduler from accidentally deferring something that can't be deferred under any circumstances, regardless of pressure level.
 
-Why it matters: Some operations are directly visible or safety-critical: an entity attacking a player, a block a player is placing, a physics body a player is riding. These should never be deferred.
-
-Implementation:
-```
-criticality(su, ctx) = 1.0 if is_critical(su, ctx) else 0.0
-```
-
-`is_critical` depends on the game, but typical rules:
+What makes an SU critical depends on the game. Typical rules:
 - Entity in direct combat with a player (dealing or receiving damage).
-- Entity a player is interacting with right now.
-- SU part of a physics simulation directly affecting a player.
-- SU is a projectile fired by a player that hasn't hit anything yet.
+- Entity a player is actively interacting with right now.
+- SU part of physics directly affecting a player.
+- Projectile fired by a player that hasn't resolved yet.
 
-Variants:
-- Use `criticality` as an absolute override rather than a weight; critical SUs bypass the scheduler entirely (see [model.md](model.md) safety nets).
-- Define "criticality levels": level 1 always runs, level 2 has high weight but can be deferred under extreme pressure.
+```
+if is_critical(su, ctx):
+    run(su)          // bypass scheduler
+    continue
+score = R(su, ctx)   // only reaches here if not critical
+```
 
 Caveats:
-- Defining criticality conservatively (more things = critical) is safer but limits optimization. Start conservative and loosen with data.
-- In ECS architectures (like Hytale/Flecs), it may be easier to define criticality at the system level rather than per entity.
+- Start conservative — when unsure, treat it as critical. You can loosen the definition later once you have data on what's actually safe to defer.
+- In ECS (like Hytale/Flecs), criticality is most practical at the system level: flag the whole system as critical if any of its matched entities involve direct player interaction, rather than filtering per entity.
 
 ---
 
@@ -133,7 +130,7 @@ Weighted sum is the simplest strategy. Alternatives:
 
 ### Maximum
 ```
-R(su) = max(proximity, interaction_recency, state_velocity, criticality)
+R(su) = max(proximity, interaction_recency, state_velocity)
 ```
 Useful when any high signal should guarantee simulation. Avoids averaging away important signals.
 
@@ -154,20 +151,17 @@ Starting point for a voxel sandbox game:
 
 | Weight | Initial value | Notes |
 |---|---|---|
-| w_d (proximity) | 0.5 | Usually the strongest signal |
-| w_i (interaction) | 0.3 | Strong signal in the short term |
+| w_d (proximity) | 0.55 | Usually the strongest signal |
+| w_i (interaction) | 0.30 | Strong signal in the short term |
 | w_v (velocity) | 0.15 | Useful but not dominant |
-| w_c (criticality) | 0.05 | Used as override, not primary signal |
 
-These are estimates. The right values depend on the game, the load profile, and what "feels right" to players. Benchmarks should drive the tuning.
+These are estimates. The right values depend on the game, the load profile, and what players actually notice. Benchmarks should drive the tuning — don't spend time hand-tuning these before you have data.
 
 ---
 
 ## Open questions
 
-- Is a single scalar enough, or do some games need multidimensional scoring (e.g., visual relevance vs. gameplay relevance)?
-- How should the relevance function handle SUs with long-range effects (explosions, area spells)?
-- What's the minimum viable relevance function? Does proximity alone get 80% of the benefit with 20% of the complexity?
+See [open-questions.md](open-questions.md). Relevant ones for the relevance function: OQ-1, OQ-4, OQ-5, OQ-6.
 
 ---
 
