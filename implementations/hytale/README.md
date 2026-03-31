@@ -32,6 +32,10 @@ Connects the engine to Hytale via bytecode injection. Contains:
 - Per-phase tick timings
 
 ### Layer 3 — Observability (`orbisoptimizer-hytale`, standard plugin)
+
+Scope is open. What Hyxin and Flecs actually expose at runtime determines what this layer can do — that's the exploration in spec/model.md section 5. Once the baseline engine signals are verified (pressure level, defer counts, score distribution, staleness hits, budget utilization), Layer 3 gets scoped around what's actually reachable.
+
+Working direction:
 - In-game commands: `/orbis status`, `/orbis map`
 - Real-time visual dashboard (simulation activity heatmap)
 - Metrics export (JSON/CSV)

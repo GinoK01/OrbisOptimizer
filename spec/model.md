@@ -154,15 +154,19 @@ Not all engines will expose all of this. Partial implementations are valid — t
 
 ## 5. Observability
 
-Any implementation must expose enough information to understand what it's doing:
+Open exploration. What's actually observable — and what it costs — depends on what Hyxin and Flecs expose at runtime. Can't answer that without running code.
+
+The floor: any implementation needs to expose enough internal state to answer "why did the server stutter at timestamp X?" without guessing. What comes after that floor is an open question until there's a working prototype.
+
+Minimum signals to aim for:
 
 - Current pressure level.
-- How many SUs were simulated vs. deferred this tick.
+- SUs simulated vs. deferred this tick.
 - Distribution of relevance scores.
-- How often the staleness limit is hit.
+- How often the staleness limit fires.
 - Actual tick budget utilization.
 
-This isn't about building a dashboard — it's about being able to answer "why did the server stutter at timestamp X?" without guessing.
+Those five are the starting point. Once real constraints from Hyxin and Flecs are understood, the full surface — commands, exports, dashboards, heatmaps — gets defined. That's Layer 3 in implementations/hytale/README.md, and it blocks on this exploration being done first.
 
 ## 6. SUs in ECS engines
 
