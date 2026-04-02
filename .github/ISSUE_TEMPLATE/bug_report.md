@@ -1,38 +1,41 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
+name: Bug / Implementation Issue
+about: Report a bug, unexpected behavior, or implementation problem
+title: "[BUG] "
 labels: implementation
 assignees: ''
-
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Component**
+Which part is affected? (engine, hytale adapter, observability, community implementation, other)
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**What happened?**
+Describe the bug or unexpected behavior.
 
 **Expected behavior**
-A clear and concise description of what you expected to happen.
+What did you expect to happen instead?
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Steps to reproduce**
+How can we trigger this? Include server setup, player count, scenario, etc.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+1. 
+2. 
+3. 
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**Environment**
+- Game / engine: (e.g. Hytale Early Access build XXXX)
+- OrbisOptimizer version: 
+- Java version: 
+- OS: 
+- CPU / RAM: 
+- Other plugins / mods: 
+
+**Logs / metrics**
+Paste relevant log output, MSPT data, or `/orbis status` output if available.
+
+```
+(paste here)
+```
 
 **Additional context**
-Add any other context about the problem here.
+Anything else — profiler output, related open questions, etc.
