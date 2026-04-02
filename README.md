@@ -64,7 +64,7 @@ OrbisOptimizer organizes the optimization problem around four concepts:
 |---|---|---|
 | Simulation Unit | A piece of server work that can be scheduled independently | An entity, a chunk, an ECS system |
 | Relevance Function | A heuristic that scores how important a unit is right now | Based on distance to players, recent interaction, state activity |
-| Tick Budget | Time available per server tick for simulation | 50ms at 20 TPS, minus fixed overhead |
+| Tick Budget | Time available per server tick for simulation | 33.3ms at 30 TPS (Hytale), minus fixed overhead. Budget is dynamic — read from `world.getTickStepNanos()` each tick. |
 | Pressure Controller | A feedback loop that adjusts optimization aggressiveness based on actual load | AIMD, stepped thresholds, etc. |
 
 These aren't new ideas — they're shared vocabulary for talking about server optimization, so implementations across different games can compare and share patterns.
@@ -98,7 +98,9 @@ orbisoptimizer/
 │       └── orbit-summary-completo.md
 │
 ├── devlog/                      # Development diary — decisions, mistakes, progress
-│   └── 001-starting-from-zero.md
+│   ├── 001-starting-from-zero.md
+│   ├── 002-pinning-down-observability.md
+│   └── 003-hytale-api-findings.md
 │
 └── CONTRIBUTING.md              # How to get involved
 ```

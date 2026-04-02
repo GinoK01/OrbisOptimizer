@@ -31,6 +31,8 @@ Each `SimulationUnit` must expose:
 
 Partial fallback: If the engine can't enumerate all SUs, enumerate a meaningful subset (e.g., entities only, ignoring chunk ticks). Document what's missing.
 
+*Hytale:* `ComponentRegistry` manages the system list internally — not in the public API. Enumerating systems requires bytecode injection into the dispatch loop. Once you have a system reference, `EntityTickingSystem.getQuery()` gives matched entity counts without further injection. Phase 1 status: partial, blocked on OQ-13.
+
 ---
 
 ### R2: Tick timings
@@ -79,6 +81,8 @@ interface PlayerTracker {
 Each `PlayerPosition` includes at minimum: player ID, world position. Optionally: view direction, interaction target.
 
 Why it matters: Proximity is the strongest relevance signal for most games. Without player positions, the proximity term is unusable.
+
+*Hytale:* Available without injection. `Universe.get().getPlayers()` → `List<PlayerRef>`; `playerRef.getTransform()` → `TransformComponent` with a `Vector3d` position. `ChunkTracker` on `PlayerRef` also exposes loaded chunks, which could work as a secondary proximity signal.
 
 ---
 
@@ -137,6 +141,8 @@ Used for: maintaining the `interaction_recency` signal in the relevance function
 
 Without this: Interaction recency can't be tracked. The relevance function falls back to proximity + state velocity only.
 
+*Hytale:* Available without injection. `PlaceBlockEvent`, `BreakBlockEvent`, `DamageBlockEvent`, `UseBlockEvent` all register via `getEventRegistry().register()` and are cancellable. Combat info comes from `DamageEventSystem` with typed sources, and `DamageDataComponent.lastCombatAction` covers recency. Entity interaction state is on `InteractionChain` from the player side.
+
 ---
 
 ### O4: State change notifications
@@ -157,7 +163,7 @@ Without this: State velocity is approximated through position delta polling or o
 
 ## ECS-specific notes
 
-For engines using Entity Component Systems (like Hytale with Flecs), the adapter contract maps differently. The full treatment is in [model.md section 6](model.md#6-sus-in-ecs-engines). Short version for the adapter:
+For engines using Entity Component Systems (like Hytale's ECS), the adapter contract maps differently. The full treatment is in [model.md section 6](model.md#6-sus-in-ecs-engines). Short version for the adapter:
 
 | Standard concept | ECS equivalent (initial implementation) |
 |---|---|
@@ -208,4 +214,4 @@ When documenting a new implementation, include a table like this:
 
 ---
 
-*The contract will be revised as we learn what Hytale's API actually exposes and what requires bytecode injection via early plugins.*
+*The contract is being revised as we learn what Hytale's API actually exposes and what requires bytecode injection via early plugins. See [devlog/003](../devlog/003-hytale-api-findings.md) for the latest findings.*

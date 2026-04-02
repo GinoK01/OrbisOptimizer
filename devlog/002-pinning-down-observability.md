@@ -19,6 +19,8 @@ Updated Layer 3 in implementations/hytale/README.md to match. The feature list i
 
 Also wrote down three decisions that had been quietly made but never documented: criticality is a pre-scoring bypass, not a weighted signal in R(). SU = ECS system for Flecs, provisional. Zero-config confirmed as option A — starts active, pressure at zero. These were answered questions I'd been carrying in my head. They needed to be in the spec.
 
+> **Critical:** read [devlog/003](003-hytale-api-findings.md) before using anything in this entry.
+
 ## Decisions made
 
 D6: Observability is an open exploration first, Layer 3 second. Five baseline signals get verified against what Hyxin and Flecs actually expose. Full surface gets defined after that. The exploration will probably surface observable contexts that aren't in the current spec — that's expected, that's why it's an exploration.

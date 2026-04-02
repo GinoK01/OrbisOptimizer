@@ -69,7 +69,7 @@ The Tick Budget is how much time the server has per tick for simulation work:
 B = (1000ms / target_TPS) - fixed_overhead
 ```
 
-At 20 TPS with 8ms of network and I/O overhead, that leaves roughly 42ms for simulation.
+At 30 TPS (Hytale's default), each tick window is 33.3ms. `world.getTickStepNanos()` returns 33,333,333 ns and is the canonical source for the budget — not a compile-time constant. `world.setTps(int)` allows runtime TPS changes, so the budget must be recomputed each tick rather than cached at startup.
 
 Fixed overhead must be measured, not guessed. It will vary by server, player count, and engine.
 
@@ -122,7 +122,7 @@ Heuristics can fail. These mechanisms limit the damage:
 
 No SU should be skipped for more than a configurable number of consecutive ticks. If it hits the limit, it's forced to simulate regardless of its relevance score. This prevents a low-relevance entity from accumulating so much stale state that simulating it later causes a performance spike.
 
-Initial value: 10 seconds of ticks (200 ticks at 20 TPS). It's an estimate; benchmarks will tell us if it's reasonable.
+Initial value: 10 seconds of ticks (300 ticks at 30 TPS). This is an estimate; benchmarks will tell us if it's reasonable. Because `world.setTps(int)` can change TPS at runtime, the staleness limit in ticks should be computed as `targetSeconds × currentTPS` rather than hardcoded.
 
 ### 3.2 Criticality override
 
@@ -154,7 +154,7 @@ Not all engines will expose all of this. Partial implementations are valid — t
 
 ## 5. Observability
 
-Open exploration. What's actually observable — and what it costs — depends on what Hyxin and Flecs expose at runtime. Can't answer that without running code.
+Open exploration. What's actually observable — and what it costs — depends on what Hyxin and Hytale's ECS expose at runtime. Can't answer that without running code.
 
 The floor: any implementation needs to expose enough internal state to answer "why did the server stutter at timestamp X?" without guessing. What comes after that floor is an open question until there's a working prototype.
 
@@ -166,17 +166,19 @@ Minimum signals to aim for:
 - How often the staleness limit fires.
 - Actual tick budget utilization.
 
-Those five are the starting point. Once real constraints from Hyxin and Flecs are understood, the full surface — commands, exports, dashboards, heatmaps — gets defined. That's Layer 3 in implementations/hytale/README.md, and it blocks on this exploration being done first.
+Those five are the starting point. Once real constraints from Hyxin and Hytale's ECS are understood, the full surface — commands, exports, dashboards, heatmaps — gets defined. That's Layer 3 in implementations/hytale/README.md, and it blocks on this exploration being done first.
 
 ## 6. SUs in ECS engines
 
 The model description above assumes something like an OOP entity with a `tick()` method — a unit you can call or skip independently. ECS engines don't work that way.
 
-In Flecs (and ECS in general), entities are just IDs with components attached. Work happens in systems, each of which processes all entities matching a query in one batch. There's no per-entity `tick()` to call or skip. The natural unit of deferral is the system, not the entity.
+In Hytale's ECS (and ECS in general), entities are just IDs with components attached. Work happens in systems, each of which processes all entities matching a query in one batch. There's no per-entity `tick()` to call or skip. The natural unit of deferral is the system, not the entity.
 
 For the initial implementation, SU = ECS system.
 
 Each running system is one Simulation Unit. The scheduler decides whether the system runs this tick. It's the coarsest possible granularity and the simplest to implement — the right starting point before adding per-entity complexity.
+
+Hytale's ECS has three ticking system types: `TickingSystem` (base, `tick(float dt)`), `EntityTickingSystem` (exposes `getQuery()` returning `Query<EntityStore>`), and `ArchetypeTickingSystem`. The catch is that `ComponentRegistry` manages the list of active systems internally — it's not in the public API. You can call `EntityTickingSystem.getQuery()` on a system reference you already have, but getting those references in the first place requires injection. See OQ-13.
 
 | Model concept | ECS equivalent |
 |---|---|
@@ -184,17 +186,17 @@ Each running system is one Simulation Unit. The scheduler decides whether the sy
 | SU position | Centroid or bounding box of entities matched by the system's query |
 | SU cost | Average execution time of the system over the last N ticks |
 | Defer SU | Skip system execution this tick |
-| Enumerate SUs | List active systems and their matched entity counts |
+| Enumerate SUs | List active systems and their matched entity counts (requires injection — see OQ-13) |
 
 With SU = system, the relevance function scores the system as a whole. Proximity becomes: how close is the nearest entity matched by this system to the nearest player? State velocity: did this system's entities change state recently? Coarser than per-entity scoring, but a system with 500 matched entities costs one score instead of 500.
 
-System-level deferral is all-or-nothing. If MovementSystem matches both a mob near a player and one on the other side of the map, deferring the system defers both. That's a real tradeoff. The alternative — per-entity deferral via Flecs tags — moves entities between archetypes every tick, which has its own cost and isn't obviously better.
+System-level deferral is all-or-nothing. If `MovementSystem` matches both a mob near a player and one on the other side of the map, deferring the system defers both. That's a real tradeoff. The alternative — per-entity deferral via archetype tags (`commandBuffer.addComponent()` / `removeComponent()`) — moves entities between archetypes every tick, which has its own cost and isn't obviously better.
 
-Whether system-level granularity is enough, or whether the coarseness hurts optimization too much, is what benchmarks will tell us. This decision is provisional and gets revisited once there are actual numbers. See OQ-7 and OQ-8 in [open-questions.md](open-questions.md).
+Whether system-level granularity is enough, or whether the coarseness hurts optimization too much, is what benchmarks will tell us. This decision is provisional and gets revisited once there are actual numbers. See OQ-8 in [open-questions.md](open-questions.md).
 
 ## Open questions
 
-See [open-questions.md](open-questions.md) for the current list. Relevant ones for the model: OQ-1, OQ-2, OQ-3, OQ-7, OQ-8.
+See [open-questions.md](open-questions.md) for the current list. Relevant ones for the model: OQ-1, OQ-3, OQ-8, OQ-13.
 
 ---
 

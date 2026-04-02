@@ -25,15 +25,15 @@ Pure Java, no Hytale dependencies. Contains:
 
 ### Layer 2 — Hytale Adapter (`orbisoptimizer-hytale`, early plugin)
 Connects the engine to Hytale via bytecode injection. Contains:
-- Tick loop hooks via Hyxin `@Inject` / `@Redirect`
-- ECS system enumeration using Flecs query API
-- Player position tracking
-- Interaction event capture
-- Per-phase tick timings
+- Tick loop hooks via Hyxin `@Inject` / `@Redirect` in `World extends TickingThread`
+- ECS system enumeration via injection in `ComponentRegistry` dispatch loop
+- Player position tracking (`Universe.get().getPlayers()` — no injection required)
+- Interaction event capture (`EventRegistry` — no injection required)
+- Per-phase tick timings via injection around each `ISystem.tick()` call
 
 ### Layer 3 — Observability (`orbisoptimizer-hytale`, standard plugin)
 
-Scope is open. What Hyxin and Flecs actually expose at runtime determines what this layer can do — that's the exploration in spec/model.md section 5. Once the baseline engine signals are verified (pressure level, defer counts, score distribution, staleness hits, budget utilization), Layer 3 gets scoped around what's actually reachable.
+Scope is open. What Hyxin and Hytale's ECS actually expose at runtime determines what this layer can do — that's the exploration in spec/model.md section 5. Once the baseline engine signals are verified (pressure level, defer counts, score distribution, staleness hits, budget utilization), Layer 3 gets scoped around what's actually reachable.
 
 Working direction:
 - In-game commands: `/orbis status`, `/orbis map`
@@ -57,20 +57,20 @@ Install both JARs. No configuration required to get started. The optimizer start
 
 | Capability | Status | Notes |
 |---|---|---|
-| R1: Enumerate SUs | Not started | Will enumerate ECS systems/archetypes via Flecs |
-| R2: Tick timings | Not started | Via Hyxin hook on the tick loop |
-| R3: Deferral control | Not started | Via `@Inject(cancellable=true)` on system execution |
-| R4: Player positions | Not started | Standard plugin API |
-| O1: Tick hooks | Not started | Hyxin pre/post tick inject |
-| O2: Per-phase timings | Not started | Per-system timings via Hyxin |
-| O3: Interaction events | Not started | Plugin event API |
-| O4: State notifications | Not started | TBD — may require polling |
+| R1: Enumerate SUs | ⚠️ Partial | Requires injection into `ComponentRegistry` dispatch loop — list not in public API. Blocked on OQ-13. |
+| R2: Tick timings | Not started | Via Hyxin inject on `World extends TickingThread` (target confirmed) |
+| R3: Deferral control | Not started | Via `@Inject(cancellable=true)` on system dispatch loop |
+| R4: Player positions | ✅ API confirmed | `Universe.get().getPlayers()` → `PlayerRef` → `TransformComponent` → `Vector3d`. No injection needed. |
+| O1: Tick hooks | Not started | Inject in `World.tick()` or `TickingThread` run loop (target: `World extends TickingThread`) |
+| O2: Per-phase timings | Not started | Wrap each `ISystem.tick()` call with `System.nanoTime()` in dispatch loop |
+| O3: Interaction events | ✅ API confirmed | `PlaceBlockEvent`, `BreakBlockEvent`, `DamageBlockEvent`, `UseBlockEvent` via `getEventRegistry().register()`. Combat via `DamageDataComponent.lastCombatAction`. |
+| O4: State notifications | Not started | Position delta polling + `MovementStatesComponent` change detection |
 
 ## Known challenges
 
-ECS architecture (Flecs): Hytale entities aren't independently schedulable. Work happens at the ECS system level. For now, SU = ECS system — the scheduler decides whether a whole system runs each tick. Per-entity or per-archetype deferral may come later depending on results. See model.md section 6.
+ECS architecture: Hytale entities aren't independently schedulable. Work happens at the ECS system level (classes: `TickingSystem`, `EntityTickingSystem`, `ArchetypeTickingSystem`). For now, SU = ECS system — the scheduler decides whether a whole system runs each tick. Per-entity deferral via archetype tags (`commandBuffer.addComponent/removeComponent`) is the alternative but has a real migration cost. The list of active systems is internal to `ComponentRegistry` and requires injection to enumerate. See OQ-13 and model.md section 6.
 
-Criticality in Hytale's interaction system: The interaction system (combos, charging, wielding, forks) is stateful. Correctly identifying "this entity is in an active interaction chain with a player" requires understanding that state at scheduling time. Starting conservative (any direct player involvement = critical).
+Criticality in Hytale's interaction system: The interaction model (combos, charging, wielding, forks) is stateful. The good news is there are four concrete signals available without injection — `DamageDataComponent.lastCombatAction`, `FlockMembership`+`Flock.currentDamageData`, `MountedComponent`, and active `InteractionChain` on a player. Starting conservative: any direct player involvement is critical. See ARQUITECTURA_FASE1.md for the full list.
 
 Injection stability: Early access means breaking changes are likely. Every injection point needs automated tests. Strict versioning per release.
 
@@ -88,7 +88,7 @@ Planned baseline comparisons:
 *To be documented once the project skeleton is in place.*
 
 Expected requirements:
-- Java 21+
+- Java 25
 - Hytale Early Access server JAR
 - Hyxin framework
-- Gradle build system
+- Gradle build system (Kotlin DSL)

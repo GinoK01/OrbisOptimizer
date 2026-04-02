@@ -11,8 +11,7 @@ These are the things we don't have answers to yet. Some will get resolved throug
 **OQ-1: Is a single relevance score enough?**
 Or do some games need multidimensional scoring — e.g., separating visual relevance from gameplay relevance, or short-term urgency from long-term importance? A scalar is simpler to reason about, but it might collapse distinctions that matter.
 
-**OQ-2: What's the right staleness limit?**
-The current default (200 ticks / 10 seconds at 20 TPS) is a guess. Is a fixed limit even the right abstraction, or should it adapt based on SU type, current pressure, or something else? What's the actual worst case when a low-relevance entity accumulates stale state?
+*OQ-2 resolved — see spec/model.md section 3.1 and devlog/003.*
 
 **OQ-3: Does the four-concept model hold for zone-scale MMO servers?**
 The model was designed with voxel sandboxes in mind. A 2000-player MMO with zone-based ticking and global event systems might need something structurally different — or the same model with very different granularity choices.
@@ -32,14 +31,15 @@ At 10,000+ SUs, proximity scoring needs some form of spatial indexing. Grid vs. 
 
 ---
 
-## ECS / Flecs
+## ECS / Hytale Engine
 
-**OQ-7: How do Simulation Units map to Flecs archetypes and systems?**
-*Provisionally answered — see model.md section 6.*
-SU = ECS system for the initial implementation. System-level deferral, system-level scoring. This is the starting point for benchmarks; per-entity granularity (OQ-8) gets explored if system-level turns out too coarse.
+*OQ-7 resolved — see spec/model.md section 6 and devlog/003.*
 
-**OQ-8: What's the overhead of per-entity tags for fine-grained deferral in Flecs?**
-Adding or removing a `Deferred` component tag moves an entity between archetypes, which has a real cost in Flecs. Is per-entity deferral practical, or does it need to be batched to avoid creating more overhead than it saves?
+**OQ-8: What's the overhead of per-entity tags for fine-grained deferral in Hytale's ECS?**
+Adding or removing a component tag moves an entity between archetypes (`commandBuffer.addComponent()` / `removeComponent()`), which has a real cost. Is per-entity deferral practical, or does it need to be batched? System-level deferral via injection (Approach A) is the starting point. This question only matters if system-level granularity turns out to be too coarse.
+
+**OQ-13: Can Hyxin inject into the `ComponentRegistry` dispatch loop for per-system timing?**
+`ComponentRegistry` manages the system list internally — not in the public API. To get system enumeration and per-system timing (profiler signal 2), the plan is to inject around each `ISystem.tick()` call in the dispatch loop. Whether that specific point is injectable, and what the target method looks like in bytecode, is unknown until we try it. If it doesn't work, signal 2 falls back to an approximate count with no per-system breakdown. Resolves when `EcsSystemReader` runs against a real server.
 
 ---
 
@@ -49,7 +49,7 @@ Adding or removing a `Deferred` component tag moves an entity between archetypes
 These are adapted from TCP, which operates in a very different environment. Game server tick loads have different variability characteristics than network traffic. Do these thresholds need to be calibrated per game, or is there a reasonable universal starting point?
 
 **OQ-10: Is multiplicative_factor = 0.5 too aggressive for recovery?**
-It halves pressure every comfortable tick — from ceiling to near-zero in about 5 ticks (250ms). That might be too fast if the comfortable period is just a brief lull between spikes. Or it might be fine. Benchmarks will tell.
+It halves pressure every comfortable tick — from ceiling to near-zero in about 5 ticks (167ms at 30 TPS). That might be too fast if the comfortable period is just a brief lull between spikes. Or it might be fine. Benchmarks will tell.
 
 ---
 
@@ -58,8 +58,7 @@ It halves pressure every comfortable tick — from ceiling to near-zero in about
 **OQ-11: Can OrbisOptimizer coexist cleanly with Catalyst?**
 Catalyst does ASM bytecode transformation at startup. OrbisOptimizer uses Hyxin (Mixin-based) injection at runtime. Are there known conflict patterns between these two approaches in Hytale's early plugin layer?
 
-**OQ-12: How should criticality be defined for Hytale's interaction system?**
-Hytale's interaction model includes combos, charging attacks, and fork states. At what point does an entity enter a state that should be treated as critical? The safe answer is "any direct player involvement," but that might be too conservative.
+*OQ-12 resolved — see ARQUITECTURA_FASE1.md (Criticality signals conocidas) and devlog/003.*
 
 ---
 
