@@ -1,6 +1,6 @@
 # OrbisOptimizer — Hytale reference implementation
 
-> Status: Phase 1 complete — passive profiler implemented, pending server verification
+> Status: Phase 1 complete — passive profiler verified against real server
 > Implements: OrbisOptimizer Model Spec v0.1.0-draft
 > Target: Hytale Early Access (January 2026+)
 
@@ -55,8 +55,8 @@ Drop the JAR into `mods/`. No configuration required. The optimizer starts activ
 
 | Capability | Status | Notes |
 |---|---|---|
-| R1: Enumerate SUs | ⚠️ Partial | Reflection on `ComponentRegistry.systemSize` via `EntityStore.REGISTRY` — returns system count if accessible, -1 otherwise. OQ-13 pending server verification. |
-| R2: Tick timings | ⚠️ Partial | `TickingThread.getBufferedTickLengthMetricSet()` — no injection required. Unverified against real server. |
+| R1: Enumerate SUs | ⚠️ Partial | Reflection on `ComponentRegistry.systemSize` via `EntityStore.REGISTRY` — confirmed working (`systems=425` on idle server). OQ-13 closed. |
+| R2: Tick timings | ⚠️ Partial | `TickingThread.getBufferedTickLengthMetricSet()` — confirmed working (`load_factor=0.008` on idle server). |
 | R3: Deferral control | Not started | Via `@Inject(cancellable=true)` on system dispatch loop |
 | R4: Player positions | ✅ API confirmed | `Universe.get().getPlayers()` → `PlayerRef` → `TransformComponent` → `Vector3d`. No injection needed. |
 | O1: Tick hooks | Not started | Inject in `World.tick()` or `TickingThread` run loop (target: `World extends TickingThread`) |

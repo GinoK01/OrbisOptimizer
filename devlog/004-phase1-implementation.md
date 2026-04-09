@@ -68,9 +68,21 @@ After that, one line per world per second. If `load_factor` is stuck at 0.000, `
 
 ---
 
+## What actually happened
+
+Ran it. Both signals came back real.
+
+```
+[OrbisOptimizer|default] load_factor=0.008 budget_util=0.008 systems=425 rel_dist=PLACEHOLDER staleness_hits=PLACEHOLDER
+```
+
+`systems=425` — reflection on `ComponentRegistry.systemSize` worked. Field name was right. OQ-13 is closed. `load_factor=0.008` makes sense for an idle server: about 0.8% of the tick budget.
+
+One warning logged at startup: the server couldn't recognize `ServerVersion: "*"` as a valid target version specifier and flagged it as a future hard error. The plugin still loaded. That's a manifest format question for Phase 2 — once we know what the server actually expects (a concrete version, a range, something else), the manifest gets updated.
+
 ## What's next
 
-Run it against a real server. Two things either work or they don't: the timing API and the reflection. Whatever the answers are, the next devlog starts from there.
+Write devlog/005 from the real data. Phase 2 starts from there.
 
 ---
 

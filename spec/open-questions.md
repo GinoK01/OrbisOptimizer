@@ -38,8 +38,7 @@ At 10,000+ SUs, proximity scoring needs some form of spatial indexing. Grid vs. 
 **OQ-8: What's the overhead of per-entity tags for fine-grained deferral in Hytale's ECS?**
 Adding or removing a component tag moves an entity between archetypes (`commandBuffer.addComponent()` / `removeComponent()`), which has a real cost. Is per-entity deferral practical, or does it need to be batched? System-level deferral via injection (Approach A) is the starting point. This question only matters if system-level granularity turns out to be too coarse.
 
-**OQ-13: Is `ComponentRegistry.systemSize` accessible via reflection?**
-`ComponentRegistry` manages the system list internally — not in the public API. `EcsSystemReader` attempts reflection on `ComponentRegistry.systemSize` via `EntityStore.REGISTRY` as a simpler alternative to bytecode injection. The field name is an educated guess from the class structure. If reflection works, signal 2 reports a real system count. If it fails, the fallback is Hyxin injection into the dispatch loop — the original approach. Resolves when the profiler runs against a real server. See [devlog/004](../devlog/004-phase1-implementation.md).
+*OQ-13 resolved — see devlog/004 and devlog/005.*
 
 ---
 

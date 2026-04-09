@@ -107,9 +107,9 @@ orbisoptimizer/
 
 ## Current status
 
-**Phase: Implementation — Phase 1 passive profiler**
+**Phase: Phase 1 complete — preparing Phase 2**
 
-The model spec is in place. The Hytale reference implementation has a working passive profiler that collects tick timing and ECS system data. It hasn't run against a real server yet — that's the next step, and it will resolve OQ-13 (whether `ComponentRegistry` internals are accessible via reflection) and produce the first real signal data.
+The model spec is in place. The Hytale passive profiler has run against a real server: tick timing works, reflection on `ComponentRegistry.systemSize` works (`systems=425` on an idle server), OQ-13 is closed. Phase 2 is the scheduling engine and deferral control.
 
 Follow progress in the [devlog](devlog/).
 
