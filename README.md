@@ -107,9 +107,9 @@ orbisoptimizer/
 
 ## Current status
 
-**Phase: Phase 1 complete — preparing Phase 2**
+**Phase: Phase 1 in progress — extending observability**
 
-The model spec is in place. The Hytale passive profiler has run against a real server: tick timing works, reflection on `ComponentRegistry.systemSize` works (`systems=425` on an idle server), OQ-13 is closed. Phase 2 is the scheduling engine and deferral control.
+The model spec is in place. The Hytale passive profiler has run against a real server: tick timing works, reflection on `ComponentRegistry.systemSize` works (`systems=425` on an idle server), OQ-13 is closed. Next: per-system timing via injection in the `ComponentRegistry` dispatch loop (OQ-14).
 
 Follow progress in the [devlog](devlog/).
 

@@ -1,6 +1,6 @@
 # OrbisOptimizer — Hytale reference implementation
 
-> Status: Phase 1 complete — passive profiler verified against real server
+> Status: Phase 1 in progress — passive profiler verified, per-system timing pending
 > Implements: OrbisOptimizer Model Spec v0.1.0-draft
 > Target: Hytale Early Access (January 2026+)
 
@@ -60,7 +60,7 @@ Drop the JAR into `mods/`. No configuration required. The optimizer starts activ
 | R3: Deferral control | Not started | Via `@Inject(cancellable=true)` on system dispatch loop |
 | R4: Player positions | ✅ API confirmed | `Universe.get().getPlayers()` → `PlayerRef` → `TransformComponent` → `Vector3d`. No injection needed. |
 | O1: Tick hooks | Not started | Inject in `World.tick()` or `TickingThread` run loop (target: `World extends TickingThread`) |
-| O2: Per-phase timings | Not started | Wrap each `ISystem.tick()` call with `System.nanoTime()` in dispatch loop |
+| O2: Per-phase timings | Next — OQ-14 | Injection in `ComponentRegistry` dispatch loop; wrap each `ISystem.tick()` with `System.nanoTime()`. Class: `EcsSystemProfiler`. |
 | O3: Interaction events | ✅ API confirmed | `PlaceBlockEvent`, `BreakBlockEvent`, `DamageBlockEvent`, `UseBlockEvent` via `getEventRegistry().register()`. Combat via `DamageDataComponent.lastCombatAction`. |
 | O4: State notifications | Not started | Position delta polling + `MovementStatesComponent` change detection |
 

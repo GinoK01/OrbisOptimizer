@@ -78,11 +78,11 @@ Ran it. Both signals came back real.
 
 `systems=425` — reflection on `ComponentRegistry.systemSize` worked. Field name was right. OQ-13 is closed. `load_factor=0.008` makes sense for an idle server: about 0.8% of the tick budget.
 
-One warning logged at startup: the server couldn't recognize `ServerVersion: "*"` as a valid target version specifier and flagged it as a future hard error. The plugin still loaded. That's a manifest format question for Phase 2 — once we know what the server actually expects (a concrete version, a range, something else), the manifest gets updated.
+One warning logged at startup: the server couldn't recognize `ServerVersion: "*"` as a valid target version specifier and flagged it as a future hard error. The plugin still loaded. That's a manifest format question for later — once I know what the server actually expects (a concrete version, a range, something else), the manifest gets updated.
 
 ## What's next
 
-Write devlog/005 from the real data. Phase 2 starts from there.
+The data is real. But 425 is still a number without context: no names, no per-system timing, no variance data. Phase 1 isn't done. Devlog/005 starts from there.
 
 ---
 
