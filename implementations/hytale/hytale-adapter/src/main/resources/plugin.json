@@ -1,0 +1,8 @@
+{
+  "Group": "dev.orbisoptimizer",
+  "Name": "orbisoptimizer",
+  "Version": "0.1.0",
+  "Description": "Passive profiler — Phase 1. Observes tick timing and ECS system count.",
+  "Main": "dev.orbisoptimizer.hytale.OrbisEarlyPlugin",
+  "ServerVersion": "*"
+}
