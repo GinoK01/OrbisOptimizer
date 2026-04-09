@@ -40,6 +40,9 @@ Adding or removing a component tag moves an entity between archetypes (`commandB
 
 *OQ-13 resolved — see devlog/004 and devlog/005.*
 
+**OQ-14: Can Hyxin inject around individual `ISystem.tick()` calls in the `ComponentRegistry` dispatch loop?**
+`EcsSystemProfiler` needs to wrap each system's `tick()` call with `System.nanoTime()` to get per-system timing and identity. `ComponentRegistry` is not public API. OQ-13 confirmed that the field `systemSize` is readable via reflection, but method-level injection is a different surface. If `@Inject` works: straightforward. If not: `@Redirect` on the `tick()` call is the fallback. If neither works, per-system timing needs a different approach. Resolves when the injection attempt runs against a real server. See [devlog/005](../devlog/005-per-system-observability.md).
+
 ---
 
 ## Pressure controller
