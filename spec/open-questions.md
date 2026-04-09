@@ -9,7 +9,7 @@ These are the things we don't have answers to yet. Some will get resolved throug
 ## Model
 
 **OQ-1: Is a single relevance score enough?**
-Or do some games need multidimensional scoring — e.g., separating visual relevance from gameplay relevance, or short-term urgency from long-term importance? A scalar is simpler to reason about, but it might collapse distinctions that matter.
+Or do some games need multidimensional scoring: e.g., separating visual relevance from gameplay relevance, or short-term urgency from long-term importance? A scalar is simpler to reason about, but it might collapse distinctions that matter.
 
 *OQ-2 resolved — see spec/model.md section 3.1 and devlog/003.*
 
@@ -38,8 +38,8 @@ At 10,000+ SUs, proximity scoring needs some form of spatial indexing. Grid vs. 
 **OQ-8: What's the overhead of per-entity tags for fine-grained deferral in Hytale's ECS?**
 Adding or removing a component tag moves an entity between archetypes (`commandBuffer.addComponent()` / `removeComponent()`), which has a real cost. Is per-entity deferral practical, or does it need to be batched? System-level deferral via injection (Approach A) is the starting point. This question only matters if system-level granularity turns out to be too coarse.
 
-**OQ-13: Can Hyxin inject into the `ComponentRegistry` dispatch loop for per-system timing?**
-`ComponentRegistry` manages the system list internally — not in the public API. To get system enumeration and per-system timing (profiler signal 2), the plan is to inject around each `ISystem.tick()` call in the dispatch loop. Whether that specific point is injectable, and what the target method looks like in bytecode, is unknown until we try it. If it doesn't work, signal 2 falls back to an approximate count with no per-system breakdown. Resolves when `EcsSystemReader` runs against a real server.
+**OQ-13: Is `ComponentRegistry.systemSize` accessible via reflection?**
+`ComponentRegistry` manages the system list internally — not in the public API. `EcsSystemReader` attempts reflection on `ComponentRegistry.systemSize` via `EntityStore.REGISTRY` as a simpler alternative to bytecode injection. The field name is an educated guess from the class structure. If reflection works, signal 2 reports a real system count. If it fails, the fallback is Hyxin injection into the dispatch loop — the original approach. Resolves when the profiler runs against a real server. See [devlog/004](../devlog/004-phase1-implementation.md).
 
 ---
 
