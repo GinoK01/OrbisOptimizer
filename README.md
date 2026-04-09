@@ -82,9 +82,10 @@ orbisoptimizer/
 │   └── adapter-contract.md      # What a game/engine must expose
 │
 ├── implementations/
-│   ├── hytale/                  # Reference implementation for Hytale (not started)
+│   ├── hytale/                  # Reference implementation for Hytale (phase 1 — passive profiler)
 │   │   ├── README.md
-│   │   └── CHANGELOG.md
+│   │   ├── CHANGELOG.md
+│   │   └── hytale-adapter/      # Plugin source and build
 │   └── community/               # Community implementations for other games
 │       └── minecraft/           # Placeholder — see README for context
 │
@@ -94,8 +95,7 @@ orbisoptimizer/
 │   ├── benchmarks/              # Results from all implementations (empty)
 │   │   ├── results/
 │   │   └── raw/
-│   └── research/                # Research and synthesis
-│       └── orbit-summary-completo.md
+│   └── research/                # Research and synthesis (empty)
 │
 ├── devlog/                      # Development diary — decisions, mistakes, progress
 │   ├── 001-starting-from-zero.md
@@ -107,9 +107,9 @@ orbisoptimizer/
 
 ## Current status
 
-🌱 **Phase: Defining the approach**
+**Phase: Implementation — Phase 1 passive profiler**
 
-The model spec and project structure are in place. The reference implementation hasn't started yet, and there are more open questions than answers. Good time to get involved if you want to influence the direction.
+The model spec is in place. The Hytale reference implementation has a working passive profiler that collects tick timing and ECS system data. It hasn't run against a real server yet — that's the next step, and it will resolve OQ-13 (whether `ComponentRegistry` internals are accessible via reflection) and produce the first real signal data.
 
 Follow progress in the [devlog](devlog/).
 

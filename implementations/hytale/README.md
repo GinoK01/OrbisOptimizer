@@ -1,6 +1,6 @@
 # OrbisOptimizer — Hytale reference implementation
 
-> Status: Not started
+> Status: Phase 1 complete — passive profiler implemented, pending server verification
 > Implements: OrbisOptimizer Model Spec v0.1.0-draft
 > Target: Hytale Early Access (January 2026+)
 
@@ -45,20 +45,18 @@ Working direction:
 
 ```
 server/
-├── early-plugins/
-│   └── orbisoptimizer-early.jar    # bytecode transformers (Layer 1 + Layer 2)
 └── mods/
-    └── orbisoptimizer.jar          # commands, dashboard, public API (Layer 3)
+    └── orbisoptimizer-early.jar    # passive profiler (Phase 1)
 ```
 
-Install both JARs. No configuration required to get started. The optimizer starts active with default settings — AIMD begins at zero pressure and only ramps up if the server actually needs it. On a healthy server, it does nothing visible.
+Drop the JAR into `mods/`. No configuration required. The optimizer starts active with default settings — AIMD begins at zero pressure and only ramps up if the server actually needs it. On a healthy server, it does nothing visible.
 
 ## Adapter contract status
 
 | Capability | Status | Notes |
 |---|---|---|
-| R1: Enumerate SUs | ⚠️ Partial | Requires injection into `ComponentRegistry` dispatch loop — list not in public API. Blocked on OQ-13. |
-| R2: Tick timings | Not started | Via Hyxin inject on `World extends TickingThread` (target confirmed) |
+| R1: Enumerate SUs | ⚠️ Partial | Reflection on `ComponentRegistry.systemSize` via `EntityStore.REGISTRY` — returns system count if accessible, -1 otherwise. OQ-13 pending server verification. |
+| R2: Tick timings | ⚠️ Partial | `TickingThread.getBufferedTickLengthMetricSet()` — no injection required. Unverified against real server. |
 | R3: Deferral control | Not started | Via `@Inject(cancellable=true)` on system dispatch loop |
 | R4: Player positions | ✅ API confirmed | `Universe.get().getPlayers()` → `PlayerRef` → `TransformComponent` → `Vector3d`. No injection needed. |
 | O1: Tick hooks | Not started | Inject in `World.tick()` or `TickingThread` run loop (target: `World extends TickingThread`) |
@@ -88,7 +86,7 @@ Planned baseline comparisons:
 *To be documented once the project skeleton is in place.*
 
 Expected requirements:
-- Java 25
+- Java 21 (toolchain; Java 25 target when Gradle 8.12+ is stable)
 - Hytale Early Access server JAR
-- Hyxin framework
+- Hyxin framework (Phase 2+)
 - Gradle build system (Kotlin DSL)
